@@ -1,7 +1,8 @@
 import {
   LinterGetOffensesFunction,
-  LinterOffense,
+  LinterGetIgnoreEolPragmaFunction,
   LinterOffenseSeverity,
+  LinterParseFixOutputFunction,
 } from "vscode-linter-api";
 
 import stripAnsi from "strip-ansi";
@@ -54,9 +55,48 @@ export const getOffenses: LinterGetOffensesFunction = ({ uri, stdout }) => {
         code: offense.code,
         message: offense.message,
         source: "vala-lint",
-        correctable: false,
+        correctable: true,
         severity: offenseSeverity[offense.severity],
         docsUrl: "",
       };
     });
+};
+
+export const parseFixOutput: LinterParseFixOutputFunction = ({
+  input,
+  stdout,
+}) => {
+  return input;
+};
+
+export const getIgnoreEolPragma: LinterGetIgnoreEolPragmaFunction = ({
+  line,
+  code,
+}) => {
+  const matches = line.text.match(/^\s*\/\/\s*vala-lint=(?:\s+(.+))?$/);
+
+  let existingCodes = [code];
+
+  if (matches && matches[1]) {
+    existingCodes.push(...matches[1].split(","));
+  }
+
+  // Ensure we keep unique codes. You could add a 3rd party dependency like
+  // lodash, or you can do it yourself.
+  existingCodes = existingCodes.reduce((buffer, item) => {
+    item = item.trim();
+
+    if (!buffer.includes(item)) {
+      buffer.push(item);
+    }
+
+    return buffer;
+  }, [] as string[]);
+
+  existingCodes.sort();
+  console.log("Existing codes:", existingCodes);
+
+  const pragma = `// vala-lint=${existingCodes.join(", ")}`;
+
+  return pragma;
 };
