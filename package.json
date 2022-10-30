@@ -1,5 +1,5 @@
 {
-  "name": "vala-lint-vscode",
+  "name": "linter-vala",
   "displayName": "Vala-Lint",
   "description": "vscode-linter extension that add Vala linting support via vala-lint",
   "version": "0.0.1",
@@ -15,7 +15,7 @@
   "contributes": {
     "configuration": {
       "properties": {
-        "linter-vala-lint-vscode.config": {
+        "linter-vala.config": {
           "default": {
             "capabilities": [
               "fix-all",

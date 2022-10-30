@@ -94,7 +94,6 @@ export const getIgnoreEolPragma: LinterGetIgnoreEolPragmaFunction = ({
   }, [] as string[]);
 
   existingCodes.sort();
-  console.log("Existing codes:", existingCodes);
 
   const pragma = `// vala-lint=${existingCodes.join(", ")}`;
 
