@@ -17,10 +17,7 @@
       "properties": {
         "linter-vala.config": {
           "default": {
-            "capabilities": [
-              "fix-all",
-              "ignore-eol"
-            ],
+            "capabilities": [],
             "command": [
               "io.elementary.vala-lint",
               "--print-end",
@@ -28,10 +25,6 @@
                 "$config",
                 "--config",
                 "$config"
-              ],
-              [
-                "$fixAll",
-                "--fix"
               ],
               "$file"
             ],
