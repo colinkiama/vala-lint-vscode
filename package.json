@@ -1,12 +1,12 @@
 {
-  "name": "linter-vala",
+  "name": "vala-lint-vscode",
   "displayName": "Vala-Lint",
-  "description": "Vala-Lint extension for: https://github.com/fnando/vsco",
+  "description": "vscode-linter extension that add Vala linting support via vala-lint",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.72.0"
   },
-  "repository": "https://www.github.com/colinkiama/linter-vala",
+  "repository": "https://www.github.com/colinkiama/vala-lint-vscode",
   "categories": [
     "Linters"
   ],
@@ -15,7 +15,7 @@
   "contributes": {
     "configuration": {
       "properties": {
-        "linter-vala.config": {
+        "linter-vala-lint-vscode.config": {
           "default": {
             "capabilities": [
               "fix-all",
