@@ -25,12 +25,18 @@
               "io.elementary.vala-lint",
               "--print-end",
               [
+                "$config",
+                "--config",
+                "$config"
+              ],
+              [
                 "$fixAll",
                 "--fix"
               ],
               "$file"
             ],
             "configFiles": [
+              "vala-lint.conf",
               ".vala-lint.conf"
             ],
             "enabled": true,
