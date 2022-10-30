@@ -1,11 +1,12 @@
 {
   "name": "linter-vala",
-  "displayName": "linter-vala",
+  "displayName": "Vala-Lint",
   "description": "Vala-Lint extension for: https://github.com/fnando/vsco",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.72.0"
   },
+  "repository": "https://www.github.com/colinkiama/linter-vala",
   "categories": [
     "Linters"
   ],
@@ -23,11 +24,11 @@
             "command": [
               "io.elementary.vala-lint",
               "--print-end",
-              "$file",
               [
                 "$fixAll",
                 "--fix"
-              ]
+              ],
+              "$file"
             ],
             "configFiles": [
               ".vala-lint.conf"
