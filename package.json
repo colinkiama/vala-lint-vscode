@@ -2,8 +2,9 @@
   "name": "linter-vala",
   "displayName": "Vala-Lint",
   "description": "vscode-linter extension that add Vala linting support via vala-lint",
-  "icon": "https://raw.githubusercontent.com/colinkiama/vala-lint-vscode/main/img/vala-lint.png",
+  "icon": "img/vala-lint.png",
   "version": "1.0.0",
+  "publisher": "ColinKiama",
   "engines": {
     "vscode": "^1.57.0"
   },
@@ -68,7 +69,7 @@
     "@types/glob": "^8.0.0",
     "@types/mocha": "^10.0.0",
     "@types/node": "16.x",
-    "@types/vscode": "^1.72.0",
+    "@types/vscode": "^1.57.0",
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "@typescript-eslint/parser": "^5.38.1",
     "@vscode/test-electron": "^2.1.5",
