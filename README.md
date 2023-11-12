@@ -50,7 +50,7 @@ To verify that the extension is working:
 2. Open the Output View (Toggle with: `CTRL + K`, `CTRL + H`)
 3. Swith the selected item in the dropdown to "linter"
 
-Now you should text like the following (Note: in this example, the file that is opened is called "Result.vala"):
+Now you should see text like the following (Note: in this example, the file that is opened is called "Result.vala"):
 
 ```
 Vala-Lint's command took 14ms
