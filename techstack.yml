@@ -1,7 +1,8 @@
 repo_name: colinkiama/vala-lint-vscode
-report_id: 398ce914c6cf50d076767da9d4ad92bb
+report_id: a067f3412f9a0399e436144d48113c10
+version: 0.1
 repo_type: Public
-timestamp: '2023-12-14T10:28:07+00:00'
+timestamp: '2024-01-05T08:49:43+00:00'
 requested_by: colinkiama
 provider: github
 branch: main
@@ -16,6 +17,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/service/1209/javascript.jpeg
+  detection_source_url: https://github.com/colinkiama/vala-lint-vscode
   detection_source: Repo Metadata
 - name: TypeScript
   description: A superset of JavaScript that compiles to clean JavaScript output
@@ -26,6 +28,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Languages
   image_url: https://img.stackshare.io/service/1612/bynNY5dJ.jpg
+  detection_source_url: https://github.com/colinkiama/vala-lint-vscode
   detection_source: Repo Metadata
 - name: ".NET"
   description: A free, cross-platform, open source developer platform for building
@@ -37,6 +40,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Frameworks (Full Stack)
   image_url: https://img.stackshare.io/service/1014/IoPy1dce_400x400.png
+  detection_source_url: https://github.com/colinkiama/vala-lint-vscode/blob/main/package.json
   detection_source: package.json
   last_updated_by: Colin Kiama
   last_updated_on: 2022-10-30 18:50:21.000000000 Z
@@ -49,6 +53,7 @@ tools:
   category: Languages & Frameworks
   sub_category: Frameworks (Full Stack)
   image_url: https://img.stackshare.io/service/1011/n1JRsFeB_400x400.png
+  detection_source_url: https://github.com/colinkiama/vala-lint-vscode/blob/main/package.json
   detection_source: package.json
   last_updated_by: Colin Kiama
   last_updated_on: 2022-10-30 18:50:21.000000000 Z
@@ -61,6 +66,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Code Review
   image_url: https://img.stackshare.io/service/3337/Q4L7Jncy.jpg
+  detection_source_url: https://github.com/colinkiama/vala-lint-vscode/blob/main/package.json
   detection_source: package.json
   last_updated_by: Colin Kiama
   last_updated_on: 2022-10-30 20:19:42.000000000 Z
@@ -72,6 +78,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Version Control System
   image_url: https://img.stackshare.io/service/1046/git.png
+  detection_source_url: https://github.com/colinkiama/vala-lint-vscode
   detection_source: Repo Metadata
 - name: Mocha
   description: Simple, flexible, fun javascript test framework for node.js &amp; the
@@ -96,6 +103,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Package Managers
   image_url: https://img.stackshare.io/service/2637/6I3oEOP4_400x400.jpg
+  detection_source_url: https://github.com/colinkiama/vala-lint-vscode/blob/main/package.json
   detection_source: package.json
   last_updated_by: Colin Kiama
   last_updated_on: 2022-10-30 18:50:21.000000000 Z
@@ -108,6 +116,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Text Editor
   image_url: https://img.stackshare.io/service/4202/Visual_Studio_Code_logo.png
+  detection_source_url: https://github.com/colinkiama/vala-lint-vscode/blob/main/.vscode/tasks.json
   detection_source: ".vscode/tasks.json"
   last_updated_by: Colin Kiama
   last_updated_on: 2022-10-30 18:50:21.000000000 Z
@@ -133,6 +142,7 @@ tools:
   category: Build, Test, Deploy
   sub_category: Front End Package Manager
   image_url: https://img.stackshare.io/service/1120/lejvzrnlpb308aftn31u.png
+  detection_source_url: https://github.com/colinkiama/vala-lint-vscode/blob/main/package.json
   detection_source: package.json
   last_updated_by: Colin Kiama
   last_updated_on: 2022-10-30 18:50:21.000000000 Z
