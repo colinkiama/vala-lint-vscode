@@ -7,6 +7,8 @@ const LANGUAGE_ID = "vala";
 const DIAGNOSTIC_SOURCE = "vala-lint";
 const CONFIG_FILE_NAMES = ["vala-lint.conf", ".vala-lint.conf"];
 const DEBOUNCE_MS = 300;
+const FIX_ALL_COMMAND = "vala-lint.fixAll";
+const FIX_ALL_TITLE = "Vala-Lint: Fix All Auto-Fixable Problems";
 
 export interface ValaLintFixPosition {
   line: number;
@@ -44,6 +46,10 @@ interface ValaLintDiagnostic extends vscode.Diagnostic {
   fix?: ResolvedFix;
 }
 
+interface FixAllCodeAction extends vscode.CodeAction {
+  documentUri?: vscode.Uri;
+}
+
 const severityMap: { [key: string]: vscode.DiagnosticSeverity } = {
   error: vscode.DiagnosticSeverity.Error,
   warn: vscode.DiagnosticSeverity.Warning,
@@ -58,7 +64,21 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     vscode.languages.registerCodeActionsProvider(LANGUAGE_ID, new ValaLintCodeActionProvider(), {
-      providedCodeActionKinds: [vscode.CodeActionKind.QuickFix],
+      providedCodeActionKinds: [vscode.CodeActionKind.QuickFix, vscode.CodeActionKind.SourceFixAll],
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(FIX_ALL_COMMAND, async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor || editor.document.languageId !== LANGUAGE_ID) {
+        return;
+      }
+
+      const edit = await computeFixAllEdit(editor.document.uri);
+      if (edit) {
+        await vscode.workspace.applyEdit(edit);
+      }
     }),
   );
 
@@ -201,6 +221,45 @@ function mistakeToDiagnostic(document: vscode.TextDocument, mistake: ValaLintMis
   return diagnostic;
 }
 
+function hasFixableDiagnostics(uri: vscode.Uri): boolean {
+  const diagnostics = diagnosticCollection.get(uri);
+  return Boolean(diagnostics?.some((diagnostic) => (diagnostic as ValaLintDiagnostic).fix));
+}
+
+async function computeFixAllEdit(uri: vscode.Uri): Promise<vscode.WorkspaceEdit | undefined> {
+  const document = await vscode.workspace.openTextDocument(uri);
+  const config = vscode.workspace.getConfiguration("vala-lint", uri);
+
+  if (!config.get<boolean>("enable", true)) {
+    return undefined;
+  }
+
+  const binary = config.get<string>("path", "io.elementary.vala-lint");
+  const configFile = config.get<string | null>("configFile", null) ?? findConfigFile(uri);
+
+  const args = ["--stdin", "--stdin-filename", uri.fsPath, "--fix"];
+  if (configFile) {
+    args.push("--config", configFile);
+  }
+
+  const originalText = document.getText();
+  const result = spawnSync(binary, args, {
+    input: originalText,
+    encoding: "utf8",
+    cwd: path.dirname(uri.fsPath),
+  });
+
+  if (result.error || typeof result.stdout !== "string" || result.stdout === originalText) {
+    return undefined;
+  }
+
+  const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(originalText.length));
+
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(uri, fullRange, result.stdout);
+  return edit;
+}
+
 function findConfigFile(uri: vscode.Uri): string | undefined {
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
   const stopAt = workspaceFolder ? workspaceFolder.uri.fsPath : path.parse(uri.fsPath).root;
@@ -236,23 +295,47 @@ class ValaLintCodeActionProvider implements vscode.CodeActionProvider {
   ): vscode.CodeAction[] {
     const actions: vscode.CodeAction[] = [];
 
-    for (const diagnostic of context.diagnostics as ValaLintDiagnostic[]) {
-      if (diagnostic.source !== DIAGNOSTIC_SOURCE || !diagnostic.fix) {
-        continue;
+    const wantsSourceFixAll = !context.only || context.only.contains(vscode.CodeActionKind.SourceFixAll);
+    if (wantsSourceFixAll && hasFixableDiagnostics(document.uri)) {
+      const fixAllAction: FixAllCodeAction = new vscode.CodeAction(
+        FIX_ALL_TITLE,
+        vscode.CodeActionKind.SourceFixAll,
+      );
+      fixAllAction.documentUri = document.uri;
+      actions.push(fixAllAction);
+    }
+
+    const wantsQuickFix = !context.only || context.only.contains(vscode.CodeActionKind.QuickFix);
+    if (wantsQuickFix) {
+      for (const diagnostic of context.diagnostics as ValaLintDiagnostic[]) {
+        if (diagnostic.source !== DIAGNOSTIC_SOURCE || !diagnostic.fix) {
+          continue;
+        }
+
+        const fix = diagnostic.fix;
+        const action = new vscode.CodeAction(`Fix: ${diagnostic.message}`, vscode.CodeActionKind.QuickFix);
+        action.diagnostics = [diagnostic];
+        action.isPreferred = true;
+
+        const edit = new vscode.WorkspaceEdit();
+        edit.replace(document.uri, fix.range, fix.replacement);
+        action.edit = edit;
+
+        actions.push(action);
       }
-
-      const fix = diagnostic.fix;
-      const action = new vscode.CodeAction(`Fix: ${diagnostic.message}`, vscode.CodeActionKind.QuickFix);
-      action.diagnostics = [diagnostic];
-      action.isPreferred = true;
-
-      const edit = new vscode.WorkspaceEdit();
-      edit.replace(document.uri, fix.range, fix.replacement);
-      action.edit = edit;
-
-      actions.push(action);
     }
 
     return actions;
+  }
+
+  async resolveCodeAction(
+    codeAction: FixAllCodeAction,
+    _token: vscode.CancellationToken,
+  ): Promise<vscode.CodeAction> {
+    if (codeAction.documentUri) {
+      codeAction.edit = await computeFixAllEdit(codeAction.documentUri);
+    }
+
+    return codeAction;
   }
 }

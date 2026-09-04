@@ -24,6 +24,12 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "vala-lint.fixAll",
+        "title": "Vala-Lint: Fix All Auto-Fixable Problems"
+      }
+    ],
     "configuration": {
       "title": "Vala-Lint",
       "properties": {
