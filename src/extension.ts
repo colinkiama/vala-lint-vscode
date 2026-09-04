@@ -9,6 +9,10 @@ const CONFIG_FILE_NAMES = ["vala-lint.conf", ".vala-lint.conf"];
 const DEBOUNCE_MS = 300;
 const FIX_ALL_COMMAND = "vala-lint.fixAll";
 const FIX_ALL_TITLE = "Vala-Lint: Fix All Auto-Fixable Problems";
+const MIN_VERSION_MESSAGE =
+  "Vala-Lint: this version of the extension requires a vala-lint build with --stdin support. " +
+  'The binary at "%s" doesn\'t appear to have it. Please install the latest vala-lint, or, ' +
+  "if you can't upgrade, use version 1.0.1 of the Vala-Lint extension instead.";
 
 export interface ValaLintFixPosition {
   line: number;
@@ -57,6 +61,8 @@ const severityMap: { [key: string]: vscode.DiagnosticSeverity } = {
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const stdinSupportCache = new Map<string, boolean>();
+const warnedBinaries = new Set<string>();
 
 export function activate(context: vscode.ExtensionContext): void {
   diagnosticCollection = vscode.languages.createDiagnosticCollection(DIAGNOSTIC_SOURCE);
@@ -89,6 +95,12 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidCloseTextDocument((document) => {
       clearScheduledLint(document);
       diagnosticCollection.delete(document.uri);
+    }),
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration("vala-lint.path")) {
+        stdinSupportCache.clear();
+        warnedBinaries.clear();
+      }
     }),
   );
 
@@ -125,6 +137,27 @@ function scheduleLint(document: vscode.TextDocument): void {
   );
 }
 
+/**
+ * Checks whether the configured vala-lint binary supports --stdin, warning the user (once
+ * per binary path) if it doesn't. This extension's linting and fix support are built
+ * entirely on --stdin, which isn't available in older vala-lint releases.
+ */
+function ensureStdinSupport(binary: string): boolean {
+  let supported = stdinSupportCache.get(binary);
+  if (supported === undefined) {
+    const result = spawnSync(binary, ["--help"], { encoding: "utf8" });
+    supported = !result.error && typeof result.stdout === "string" && result.stdout.includes("--stdin");
+    stdinSupportCache.set(binary, supported);
+  }
+
+  if (!supported && !warnedBinaries.has(binary)) {
+    warnedBinaries.add(binary);
+    vscode.window.showErrorMessage(MIN_VERSION_MESSAGE.replace("%s", binary));
+  }
+
+  return supported;
+}
+
 function lintDocument(document: vscode.TextDocument): void {
   if (document.languageId !== LANGUAGE_ID) {
     return;
@@ -138,6 +171,12 @@ function lintDocument(document: vscode.TextDocument): void {
   }
 
   const binary = config.get<string>("path", "io.elementary.vala-lint");
+
+  if (!ensureStdinSupport(binary)) {
+    diagnosticCollection.delete(document.uri);
+    return;
+  }
+
   const configFile = config.get<string | null>("configFile", null) ?? findConfigFile(document.uri);
 
   const args = ["--stdin", "--stdin-filename", document.uri.fsPath, "--json-output", "--print-end"];
@@ -235,6 +274,11 @@ async function computeFixAllEdit(uri: vscode.Uri): Promise<vscode.WorkspaceEdit 
   }
 
   const binary = config.get<string>("path", "io.elementary.vala-lint");
+
+  if (!ensureStdinSupport(binary)) {
+    return undefined;
+  }
+
   const configFile = config.get<string | null>("configFile", null) ?? findConfigFile(uri);
 
   const args = ["--stdin", "--stdin-filename", uri.fsPath, "--fix"];
